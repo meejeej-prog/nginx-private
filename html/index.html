@@ -1,11 +1,163 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>nginx: 웹 서버</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Name Viewer | FastAPI & Nginx</title>
+<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com/)">
+<link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com/)" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #6366f1;
+--secondary: #a855f7;
+--bg: #0f172a;
+--card-bg: rgba(30, 41, 59, 0.7);
+--text: #f8fafc;
+}
+
+```
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Outfit', sans-serif;
+        background-color: var(--bg);
+        background-image:
+            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0, transparent 50%);
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .container {
+        text-align: center;
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        padding: 3rem;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        max-width: 400px;
+        width: 90%;
+        transition: transform 0.3s ease;
+    }
+
+    .container:hover {
+        transform: translateY(-5px);
+    }
+
+    h1 {
+        font-weight: 600;
+        margin-bottom: 2rem;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+    }
+
+    .name-container {
+        font-size: 1.5rem;
+        font-weight: 300;
+        min-height: 2rem;
+        margin: 2rem 0;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .name-container.show {
+        opacity: 1;
+    }
+
+    .loader {
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    button {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    button:hover {
+        opacity: 0.9;
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .status {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 1.5rem;
+    }
+</style>
+
+```
+
 </head>
-<body style="background:#FFF url('images/nginx.png') no-repeat center 100px;">
-    <h1>nginx: 웹 서버</h1>
+<body>
+<div class="container">
+<h1>Profile</h1>
+<div id="nameDisplay" class="name-container">
+<div class="loader"></div>
+</div>
+<button onclick="fetchName()">Refresh Name</button>
+<div class="status">Connected to FastAPI Backend</div>
+</div>
+
+```
+<script>
+    async function fetchName() {
+        const display = document.getElementById('nameDisplay');
+        display.classList.remove('show');
+        display.innerHTML = '<div class="loader"></div>';
+
+        try {
+            // Nginx proxies /api/ to the backend
+            const response = await fetch('/api/name');
+            const data = await response.json();
+
+            setTimeout(() => {
+                display.innerText = data.name || "Name not found";
+                display.classList.add('show');
+            }, 500);
+        } catch (error) {
+            display.innerText = "Error connecting to API";
+            display.classList.add('show');
+            console.error('Error:', error);
+        }
+    }
+
+    // Initial fetch
+    window.addEventListener('DOMContentLoaded', fetchName);
+</script>
+
+```
+
 </body>
 </html>
